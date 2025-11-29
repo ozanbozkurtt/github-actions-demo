@@ -34,7 +34,3 @@ jobs:
       branch: ${{ startsWith(github.ref, 'refs/tags/v') && 'main' || (github.event_name == 'pull_request' && github.base_ref || github.ref_name) }}
       version: ${{ github.run_number }}
       dockerfile_path: ./dockerfiles/${{ startsWith(github.ref, 'refs/tags/v') && 'main' || (github.event_name == 'pull_request' && github.base_ref || github.ref_name) }}/${{ github.event.repository.name }}
-    secrets:
-      DOCKER_REGISTRY_USER: ${{ secrets.DOCKER_REGISTRY_USER }}
-      DOCKER_REGISTRY_TOKEN: ${{ secrets.DOCKER_REGISTRY_TOKEN }}
-      PAT: ${{ secrets.PAT }}
