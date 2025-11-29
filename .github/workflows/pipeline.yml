@@ -2,20 +2,21 @@ name: CI/CD
 
 on:
   push:
-    branches: [ main ]
+    branches: [ preprod ]
     tags: [ "v*.*.*" ]
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
-    branches: [ main ]
+    branches: [ preprod ]
   workflow_dispatch:
     inputs:
       target_branch:
         description: "Build edilecek branch"
         required: true
-        default: "main"
+        default: "preprod"
         type: choice
         options:
-          - main
+          - preprod
+          - prod
 
 permissions:
   contents: read
@@ -26,11 +27,15 @@ jobs:
   build-and-push:
     if: |
       startsWith(github.ref, 'refs/tags/v') ||
-      github.ref_name == 'main' ||
+      github.ref_name == 'preprod' ||
       github.event_name == 'pull_request'
 
     uses: ozanbozkurtt/pipelines/.github/workflows/docker-swarm-v1.yml@main
     with:
-      branch: ${{ startsWith(github.ref, 'refs/tags/v') && 'main' || (github.event_name == 'pull_request' && github.base_ref || github.ref_name) }}
+      branch: ${{ startsWith(github.ref, 'refs/tags/v') && 'prod' || (github.event_name == 'pull_request' && github.base_ref || github.ref_name) }}
       version: ${{ github.run_number }}
-      dockerfile_path: ./dockerfiles/${{ startsWith(github.ref, 'refs/tags/v') && 'main' || (github.event_name == 'pull_request' && github.base_ref || github.ref_name) }}/${{ github.event.repository.name }}
+      dockerfile_path: ./dockerfiles/${{ startsWith(github.ref, 'refs/tags/v') && 'prod' || (github.event_name == 'pull_request' && github.base_ref || github.ref_name) }}/${{ github.event.repository.name }}
+    secrets:
+      DOCKER_REGISTRY_USER: ${{ secrets.DOCKER_REGISTRY_USER }}
+      DOCKER_REGISTRY_TOKEN: ${{ secrets.DOCKER_REGISTRY_TOKEN }}
+      PAT: ${{ secrets.PAT }}
